@@ -15,7 +15,7 @@ def incoming_sms():
     """Send a dynamic reply to an incoming text message"""
     # Get the message the user sent our Twilio number
     user_number = request.values.get('From', None)
-    body = request.values.get('Body', None).lower();
+    body = request.values.get('Body', None).lower().strip();
     media_url = request.values.get('MediaUrl0', None);
     key = open("apikey.txt").read().replace("\n", "")
     ingredients_to_query = ""
