@@ -1,5 +1,5 @@
 import requests
-from ClarifaiRequest import *
+from clarifai_request import *
 from flask import Flask, request, redirect
 from twilio.twiml.messaging_response import MessagingResponse
 from pymongo import MongoClient

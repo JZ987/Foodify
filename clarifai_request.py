@@ -2,10 +2,10 @@ from clarifai.rest import ClarifaiApp
 
 clarafai_model_debug = False;
 
-def determine_ingredient(photo):
+def determine_ingredient(photo_url):
     app = ClarifaiApp()
     model = app.models.get('food')
-    response = model.predict_by_filename(photo);
+    response = model.predict_by_url(url=photo_url);
 
     concepts = response['outputs'][0]['data']['concepts']
     if (clarafai_model_debug == True):
@@ -14,6 +14,7 @@ def determine_ingredient(photo):
         
     probableIngredient = concepts[0]['name'];
     return probableIngredient
+
 
 
 
