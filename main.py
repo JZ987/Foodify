@@ -24,7 +24,25 @@ def incoming_sms():
         for ingredients in ingredients:
             ingredients_to_query += ingredients + " "
 
+        response = requests.get("https://community-food2fork.p.mashape.com/search?key=" + key + "&q=" + ingredients_to_query,
+                            headers={
+                            "X-Mashape-Key": "rjq7HBFHZTmshDawy37VfzQb0HNKp118a2Jjsnp4pTmBWsnAO7",
+                            "Accept": "application/json"
+                            }).json()
+
+            
+        # Start our TwiML response
+        resp = MessagingResponse()
+    
+        # Determine the right reply for this message
+        resp.message(response["recipes"][0]["title"] + " " +  response["recipes"][0]["source_url"])
+
+
+
+            
         db.users.remove({"phone_number" : user_number});
+
+        return str(resp)
     else:
         if (db.users.count({'phone_number':user_number}) == 0):
             db.users.insert({'phone_number':user_number, 'ingredients':[body]})
@@ -32,21 +50,12 @@ def incoming_sms():
             result = db.users.update_one({'phone_number':user_number}, {"$push":{'ingredients':body}})
 
 
-    response = requests.get("https://community-food2fork.p.mashape.com/search?key=" + key + "&q=" + ingredients_to_query,
-        headers={
-        "X-Mashape-Key": "rjq7HBFHZTmshDawy37VfzQb0HNKp118a2Jjsnp4pTmBWsnAO7",
-        "Accept": "application/json"
-        }).json()
+
+    return("hello");        
 
 
-    # Start our TwiML response
-    resp = MessagingResponse()
-
-    # Determine the right reply for this message
-    resp.message(response["recipes"][0]["title"] + " " +  response["recipes"][0]["source_url"])
-
-
-    return str(resp)
+    
+    
 
 def request_recipe():
     response = requests.get("https://community-food2fork.p.mashape.com/search?key=" + key + "&q=" + body,
