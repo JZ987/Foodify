@@ -5,7 +5,7 @@ clarafai_model_debug = False;
 def determine_ingredient(photo):
     app = ClarifaiApp()
     model = app.models.get('food')
-    response = model.predict_by_url(url=photo);
+    response = model.predict_by_filename(photo);
 
     concepts = response['outputs'][0]['data']['concepts']
     if (clarafai_model_debug == True):
