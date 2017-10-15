@@ -11,7 +11,8 @@ using the food2fork api we received the top 3 results for recipes that include a
 The information is then processed and a text message with the name of the recipe and the url is sent to the user.
 
 ## Built With
-* [Twilio](https://www.twilio.com/sms/api) - Used for user interactions
-* [Flask](http://flask.pocoo.org/) - Used to host the Twilio application in order to recieve and send messages
-* [Clarifai](https://www.clarifai.com/) - Used to process images and convert it into text
-* [Food2Fork](https://food2fork.com/about/api) - Database of recipes
+* [Twilio](https://www.twilio.com/sms/api) - Enabled two-way communication between app and user
+* [Flask](http://flask.pocoo.org/) - Used to host application, faciliatate communication between APIs and parse data.
+* [Clarifai](https://www.clarifai.com/) - Used custom model trained to recognize ingredients
+* [Food2Fork](https://food2fork.com/about/api) - Used to lookup recipes based on ingredients
+* [MongoDB] (https://www.mongodb.com) - Database to store user data
