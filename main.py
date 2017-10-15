@@ -26,19 +26,29 @@ def incoming_sms():
         for ingredients in ingredients:
             ingredients_to_query += ingredients + " "
 
-        response = requests.get("https://community-food2fork.p.mashape.com/search?key=" + key + "&q=" + ingredients_to_query,
+        responses = requests.get("https://community-food2fork.p.mashape.com/search?key=" + key + "&q=" + ingredients_to_query,
                             headers={
                             "X-Mashape-Key": "rjq7HBFHZTmshDawy37VfzQb0HNKp118a2Jjsnp4pTmBWsnAO7",
                             "Accept": "application/json"
                             }).json()
 
-            
+
         # Start our TwiML response
         resp = MessagingResponse()
-    
+        print(responses)
         # Determine the right reply for this message
-        resp.message(response["recipes"][0]["title"] + " " +  response["recipes"][0]["source_url"])
-        
+        reply = ""
+        if responses['count'] == 0:
+            reply += "No results found"
+        elif responses['count'] < 3:
+            for response in range(1, len(responses) + 1):
+                reply += "{}). ".format(response) + responses["recipes"][response]["title"] + " " +  responses["recipes"][response]["source_url"] + "\n"
+        else:
+            for response in range(1, 4):
+                reply += "{}). ".format(response) + responses["recipes"][response]["title"] + " " +  responses["recipes"][response]["source_url"] + "\n"
+
+        resp.message(reply)
+
         db.users.remove({"phone_number" : user_number});
 
         return str(resp)
@@ -57,12 +67,12 @@ def incoming_sms():
     else:
         result = db.users.update_one({'phone_number':user_number}, {"$push":{'ingredients':ingredient}})
 
-        
-    return("hello");        
+
+    return("hello");
 
 
-    
-    
+
+
 
 def request_recipe():
     response = requests.get("https://community-food2fork.p.mashape.com/search?key=" + key + "&q=" + body,
@@ -73,9 +83,9 @@ def request_recipe():
     ).json()
 
 
-            
-    
-    
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
