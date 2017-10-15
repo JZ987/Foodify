@@ -4,12 +4,11 @@ from flask import Flask, request, redirect
 from twilio.twiml.messaging_response import MessagingResponse
 from pymongo import MongoClient
 
+client = MongoClient()
+db = client.test
 
 app = Flask(__name__)
 @app.route("/", methods=['GET', 'POST'])
-
-client = MongoClient()
-db = client.test
 
 def incoming_sms():
     """Send a dynamic reply to an incoming text message"""
