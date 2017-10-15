@@ -15,4 +15,4 @@ The information is then processed and a text message with the name of the recipe
 * [Flask](http://flask.pocoo.org/) - Used to host application, faciliatate communication between APIs and parse data.
 * [Clarifai](https://www.clarifai.com/) - Used custom model trained to recognize ingredients
 * [Food2Fork](https://food2fork.com/about/api) - Used to lookup recipes based on ingredients
-* [MongoDB] (https://www.mongodb.com) - Database to store user data
+* [MongoDB](https://www.mongodb.com) - Database to store user data
