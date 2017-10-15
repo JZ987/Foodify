@@ -1,31 +1,81 @@
 import requests
+from clarifai_request import *
 from flask import Flask, request, redirect
 from twilio.twiml.messaging_response import MessagingResponse
+from pymongo import MongoClient
 
 app = Flask(__name__)
+client = MongoClient()
+db = client.test
 
 @app.route("/", methods=['GET', 'POST'])
+
 
 def incoming_sms():
     """Send a dynamic reply to an incoming text message"""
     # Get the message the user sent our Twilio number
-    body = request.values.get('Body', None)
+    user_number = request.values.get('From', None)
+    body = request.values.get('Body', None).lower().strip();
+    media_url = request.values.get('MediaUrl0', None);
     key = open("apikey.txt").read().replace("\n", "")
-    if body == None:
-        body = "chicken"
+    ingredients_to_query = ""
+    print(request.values)
+    if (body == 'search'): #user request a search using the ingredients they have inputed
+        user = db.users.find_one({'phone_number':user_number})
+        ingredients = user['ingredients']
+        for ingredients in ingredients:
+            ingredients_to_query += ingredients + " "
+
+        response = requests.get("https://community-food2fork.p.mashape.com/search?key=" + key + "&q=" + ingredients_to_query,
+                            headers={
+                            "X-Mashape-Key": "rjq7HBFHZTmshDawy37VfzQb0HNKp118a2Jjsnp4pTmBWsnAO7",
+                            "Accept": "application/json"
+                            }).json()
+
+            
+        # Start our TwiML response
+        resp = MessagingResponse()
+    
+        # Determine the right reply for this message
+        resp.message(response["recipes"][0]["title"] + " " +  response["recipes"][0]["source_url"])
+        
+        db.users.remove({"phone_number" : user_number});
+
+        return str(resp)
+
+    #
+    #db.users.insert({'phone_number':user_number, 'ingredients':[body]})
+    #print("determined_ingredient:" + ingredient)
+
+    if (media_url != None):
+        ingredient = determine_ingredient(media_url)
+    else:
+        ingredient = body
+
+    if (db.users.count({'phone_number':user_number}) == 0):
+        db.users.insert({'phone_number':user_number, 'ingredients':[ingredient]})
+    else:
+        result = db.users.update_one({'phone_number':user_number}, {"$push":{'ingredients':ingredient}})
+
+        
+    return("hello");        
+
+
+    
+    
+
+def request_recipe():
     response = requests.get("https://community-food2fork.p.mashape.com/search?key=" + key + "&q=" + body,
         headers={
         "X-Mashape-Key": "rjq7HBFHZTmshDawy37VfzQb0HNKp118a2Jjsnp4pTmBWsnAO7",
         "Accept": "application/json"
         }
     ).json()
-    # Start our TwiML response
-    resp = MessagingResponse()
 
-    # Determine the right reply for this message
-    resp.message(response["recipes"][0]["title"] + " " +  response["recipes"][0]["source_url"])
 
-    return str(resp)
+            
+    
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
@@ -56,7 +106,7 @@ if __name__ == "__main__":
 #
 #     query = query.lower().replace(" ","+").replace(",","%2C")
 #     key = open("apikey.txt").read().replace("\n", "")
-#
+_#
 #     response = requests.get("https://community-food2fork.p.mashape.com/search?key=" + key + "&q=" + query,
 #         headers={
 #         "X-Mashape-Key": "rjq7HBFHZTmshDawy37VfzQb0HNKp118a2Jjsnp4pTmBWsnAO7",
