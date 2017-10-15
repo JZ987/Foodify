@@ -1,4 +1,5 @@
 import requests
+from ClarifaiRequest import *
 from flask import Flask, request, redirect
 from twilio.twiml.messaging_response import MessagingResponse
 from pymongo import MongoClient
@@ -15,10 +16,11 @@ def incoming_sms():
     # Get the message the user sent our Twilio number
     user_number = request.values.get('From', None)
     body = request.values.get('Body', None).lower();
+    media_url = request.values.get('MediaUrl0', None);
     key = open("apikey.txt").read().replace("\n", "")
     ingredients_to_query = ""
     print(request.values)
-    if (body == 'search'):
+    if (body == 'search'): #user request a search using the ingredients they have inputed
         user = db.users.find_one({'phone_number':user_number})
         ingredients = user['ingredients']
         for ingredients in ingredients:
@@ -36,21 +38,26 @@ def incoming_sms():
     
         # Determine the right reply for this message
         resp.message(response["recipes"][0]["title"] + " " +  response["recipes"][0]["source_url"])
-
-
-
-            
+        
         db.users.remove({"phone_number" : user_number});
 
         return str(resp)
+
+    #
+    #db.users.insert({'phone_number':user_number, 'ingredients':[body]})
+    #print("determined_ingredient:" + ingredient)
+
+    if (media_url != None):
+        ingredient = determine_ingredient(media_url)
     else:
-        if (db.users.count({'phone_number':user_number}) == 0):
-            db.users.insert({'phone_number':user_number, 'ingredients':[body]})
-        else:
-            result = db.users.update_one({'phone_number':user_number}, {"$push":{'ingredients':body}})
+        ingredient = body
 
+    if (db.users.count({'phone_number':user_number}) == 0):
+        db.users.insert({'phone_number':user_number, 'ingredients':[ingredient]})
+    else:
+        result = db.users.update_one({'phone_number':user_number}, {"$push":{'ingredients':ingredient}})
 
-
+        
     return("hello");        
 
 
