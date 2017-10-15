@@ -1,5 +1,5 @@
-# Stores api key for Softheon
-application.json
+# Api keys
+apikey.txt
 
 # Compiled class file
 *.class
