@@ -16,6 +16,8 @@ def incoming_sms():
     user_number = request.values.get('From', None)
     body = request.values.get('Body', None).lower().strip();
     media_url = request.values.get('MediaUrl0', None);
+
+    resp = MessagingResponse()
     if (body == 'search'): #user request a search using the ingredients they have inputed
         user = db.users.find_one({'phone_number':user_number})
         ingredients = user['ingredients']
@@ -30,8 +32,7 @@ def incoming_sms():
         ingredient = body
 
     store_ingredient(user_number, ingredient);
-    return ("hello")
-
+    return str(resp)
 
 def store_ingredient(user_number, ingredient):
     """
@@ -61,8 +62,8 @@ def request_recipes(ingredients):
     """
     key = open("apikey.txt").read().replace("\n", "")
     ingredients_to_query = ""
-    for ingredients in ingredients:
-        ingredients_to_query += ingredients + " "
+    for ingredient in ingredients:
+        ingredients_to_query += ingredient + " "
     return requests.get("https://community-food2fork.p.mashape.com/search?key=" + key + "&q=" + ingredients_to_query,
                         headers={"X-Mashape-Key": "rjq7HBFHZTmshDawy37VfzQb0HNKp118a2Jjsnp4pTmBWsnAO7","Accept": "application/json"}).json()
 
@@ -83,7 +84,7 @@ def format_response_to_user(responses):
     if responses['count'] == 0:
         reply += "No results found"
     elif responses['count'] < 3:
-        for response in range(1, len(responses) + 1):
+        for response in range(1, len(responses['recipes']) + 1):
             reply += "{}). ".format(response) + responses["recipes"][response-1]["title"] + " " +  responses["recipes"][response-1]["source_url"] + "\n"
     else:
         for response in range(1, 4):
