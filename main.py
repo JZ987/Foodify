@@ -19,8 +19,8 @@ def incoming_sms():
     if (body == 'search'): #user request a search using the ingredients they have inputed
         user = db.users.find_one({'phone_number':user_number})
         ingredients = user['ingredients']
-        responses = request_recipes(ingredients) 
-        resp = format_response_to_user(responses); 
+        responses = request_recipes(ingredients)
+        resp = format_response_to_user(responses);
         db.users.remove({"phone_number" : user_number})
         return str(resp)
 
@@ -30,7 +30,7 @@ def incoming_sms():
         ingredient = body
 
     store_ingredient(user_number, ingredient);
-    return("hello");
+    return ("hello")
 
 
 def store_ingredient(user_number, ingredient):
@@ -38,7 +38,7 @@ def store_ingredient(user_number, ingredient):
     Stores ingredient into the database
     If user is new, new document is created
     If user already exists, ingredient is appended to the user's array of ingredients
-    
+
     Arguments:
     user_number: phone number of user
     ingredient: ingredient to be stored
@@ -47,12 +47,12 @@ def store_ingredient(user_number, ingredient):
         db.users.insert({'phone_number':user_number, 'ingredients':[ingredient]})
     else:
         db.users.update_one({'phone_number':user_number}, {"$push":{'ingredients':ingredient}})
-    
+
 
 def request_recipes(ingredients):
     """
     Requests recipes from recipes api
-    
+
     Arguments:
     ingredients: array of ingredients to search
 
@@ -69,7 +69,7 @@ def request_recipes(ingredients):
 def format_response_to_user(responses):
     """
     Formats recipes into response to user
-    
+
     Arguments:
     responses: recipe responses from the recipes api
 
@@ -84,14 +84,13 @@ def format_response_to_user(responses):
         reply += "No results found"
     elif responses['count'] < 3:
         for response in range(1, len(responses) + 1):
-            reply += "{}). ".format(response) + responses["recipes"][response]["title"] + " " +  responses["recipes"][response]["source_url"] + "\n"
+            reply += "{}). ".format(response) + responses["recipes"][response-1]["title"] + " " +  responses["recipes"][response-1]["source_url"] + "\n"
     else:
         for response in range(1, 4):
-            reply += "{}). ".format(response) + responses["recipes"][response]["title"] + " " +  responses["recipes"][response]["source_url"] + "\n"
+            reply += "{}). ".format(response) + responses["recipes"][response-1]["title"] + " " +  responses["recipes"][response-1]["source_url"] + "\n"
 
     resp.message(reply)
     return(resp);
 
 if __name__ == "__main__":
     app.run(debug=True)
-
